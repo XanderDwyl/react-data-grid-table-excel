@@ -27,6 +27,7 @@ export default defineConfig({
         'antd-style',
         /^antd\//,
         /^@ant-design/,
+        'xlsx-js-style',
       ],
     },
     sourcemap: true,

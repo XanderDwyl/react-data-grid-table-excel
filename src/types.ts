@@ -1,5 +1,28 @@
 import type { ReactNode, CSSProperties } from 'react';
 
+export interface GridTheme {
+  /** Grid-specific color overrides */
+  grid?: {
+    headerBg?: string;
+    headerColor?: string;
+    cellBorderColor?: string;
+    rowHoverBg?: string;
+    frozenHeaderBg?: string;
+    unfrozenHeaderBg?: string;
+    frozenColumnShadow?: string;
+    editOutlineColor?: string;
+  };
+  /** Ant Design token overrides (scoped to the grid) */
+  tokens?: {
+    colorPrimary?: string;
+    fontSize?: number;
+    borderRadius?: number;
+    fontFamily?: string;
+  };
+  /** Status color map — key is label, value is bg/text colors */
+  statusColors?: Record<string, { bg: string; color: string }>;
+}
+
 export type SortDirection = 'asc' | 'desc' | null;
 
 export interface SortState {
@@ -69,6 +92,22 @@ export interface DataGridProps<TRow = any> {
   showColumnLetters?: boolean;
   /** Callback when a column's freeze checkbox is toggled. Enables freeze checkboxes in the column letter row. */
   onFreezeChange?: (columnKey: string, frozen: boolean) => void;
+  /** Enable the theme settings float button. Defaults to false. */
+  themeConfigurable?: boolean;
+  /** Controlled theme state. */
+  theme?: GridTheme;
+  /** Callback when theme changes (real-time). */
+  onThemeChange?: (theme: GridTheme) => void;
+  /** Show the theme float button. Defaults to true when themeConfigurable is true. */
+  showThemeButton?: boolean;
+  /** Custom trigger component to replace the default FloatButton. */
+  themeButtonRender?: (onClick: () => void) => ReactNode;
+  /** Show a download-as-Excel icon. Defaults to false. */
+  exportable?: boolean;
+  /** Filename without extension. Defaults to 'export'. */
+  exportFileName?: string;
+  /** Position of the download icon relative to the table. Defaults to 'top-right'. */
+  exportButtonPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   /** Optional CSS class for the outermost wrapper */
   className?: string;
   /** Optional inline style for the outermost wrapper */

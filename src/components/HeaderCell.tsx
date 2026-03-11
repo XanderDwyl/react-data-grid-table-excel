@@ -11,6 +11,7 @@ interface HeaderCellProps<TRow> {
   onSort: (columnKey: string) => void;
   stickyStyle?: CSSProperties;
   onFreezeChange?: (columnKey: string, frozen: boolean) => void;
+  themeBg?: string;
 }
 
 function HeaderCell<TRow>({
@@ -19,6 +20,7 @@ function HeaderCell<TRow>({
   onSort,
   stickyStyle,
   onFreezeChange,
+  themeBg,
 }: HeaderCellProps<TRow>) {
   const { styles, cx } = useGridStyles();
   const isSortable = column.sortable !== false;
@@ -34,6 +36,7 @@ function HeaderCell<TRow>({
     ...(column.width ? { width: column.width } : {}),
     ...column.headerStyle,
     ...stickyStyle,
+    ...(themeBg ? { backgroundColor: themeBg } : {}),
   };
 
   return (

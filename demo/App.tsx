@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { ConfigProvider, ColorPicker } from 'antd';
 import type { ColorPickerProps } from 'antd';
 import { DataGrid } from 'react-data-grid-table';
-import type { ColumnDef } from 'react-data-grid-table';
+import type { ColumnDef, GridTheme } from 'react-data-grid-table';
 
 // =====================================================
 // STATUS COLOR MAP (dynamic, stateful)
@@ -313,10 +313,13 @@ function LegendItem({
 export default function App() {
   const [data] = useState(sourceData);
 
-  // Dynamic status color map
-  const [statusColors, setStatusColors] = useState<Record<string, StatusStyle>>(
-    DEFAULT_STATUS_COLORS,
-  );
+  // Theme state (controlled) — status colors live inside the theme
+  const [gridTheme, setGridTheme] = useState<GridTheme>({
+    statusColors: DEFAULT_STATUS_COLORS,
+  });
+
+  // Dynamic status color map — derived from theme
+  const statusColors = gridTheme.statusColors ?? DEFAULT_STATUS_COLORS;
   const statusColorsRef = useRef(statusColors);
   statusColorsRef.current = statusColors;
 
@@ -333,9 +336,12 @@ export default function App() {
   }, []);
 
   const handleLegendColorChange = useCallback((label: string, newBg: string) => {
-    setStatusColors((prev) => ({
+    setGridTheme((prev) => ({
       ...prev,
-      [label]: { bg: newBg, color: contrastColor(newBg) },
+      statusColors: {
+        ...prev.statusColors,
+        [label]: { bg: newBg, color: contrastColor(newBg) },
+      },
     }));
   }, []);
 
@@ -343,9 +349,12 @@ export default function App() {
   const ensureStatus = useCallback((value: string) => {
     if (!value || statusColorsRef.current[value]) return;
     const bg = randomColor();
-    setStatusColors((prev) => ({
+    setGridTheme((prev) => ({
       ...prev,
-      [value]: { bg, color: contrastColor(bg) },
+      statusColors: {
+        ...prev.statusColors,
+        [value]: { bg, color: contrastColor(bg) },
+      },
     }));
   }, []);
 
@@ -465,6 +474,11 @@ export default function App() {
           onCellEdit={handleCellEdit}
           onCellChange={handleCellChange}
           onFreezeChange={toggleFrozen}
+          exportable
+          exportFileName="ticket-connectivity-status"
+          themeConfigurable
+          theme={gridTheme}
+          onThemeChange={setGridTheme}
         />
       </div>
     </ConfigProvider>

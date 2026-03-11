@@ -1,8 +1,9 @@
 import { createStyles } from 'antd-style';
+import type { GridTheme } from '../types';
 
-const useGridStyles = createStyles(({ token, css }) => ({
+const useGridStyles = createStyles(({ token, css }, gridOverrides?: GridTheme['grid']) => ({
   gridWrapper: css`
-    border: 1px solid ${token.colorBorderSecondary};
+    border: 1px solid ${gridOverrides?.cellBorderColor ?? token.colorBorderSecondary};
     border-radius: ${token.borderRadius}px;
     overflow-x: auto;
     overflow-y: auto;
@@ -43,13 +44,13 @@ const useGridStyles = createStyles(({ token, css }) => ({
     }
   `,
   headerCell: css`
-    background: ${token.colorFillQuaternary};
-    border-bottom: 2px solid ${token.colorBorderSecondary};
-    border-right: 1px solid ${token.colorBorderSecondary};
+    background: ${gridOverrides?.headerBg ?? token.colorFillQuaternary};
+    border-bottom: 2px solid ${gridOverrides?.cellBorderColor ?? token.colorBorderSecondary};
+    border-right: 1px solid ${gridOverrides?.cellBorderColor ?? token.colorBorderSecondary};
     padding: ${token.paddingXS}px ${token.paddingSM}px;
     text-align: left;
     font-weight: ${token.fontWeightStrong};
-    color: ${token.colorTextHeading};
+    color: ${gridOverrides?.headerColor ?? token.colorTextHeading};
     user-select: none;
     white-space: nowrap;
     position: relative;
@@ -81,12 +82,12 @@ const useGridStyles = createStyles(({ token, css }) => ({
   `,
   row: css`
     &:hover {
-      background: ${token.colorPrimaryBg};
+      background: ${gridOverrides?.rowHoverBg ?? token.colorPrimaryBg};
     }
   `,
   cell: css`
-    border-bottom: 1px solid ${token.colorBorderSecondary};
-    border-right: 1px solid ${token.colorBorderSecondary};
+    border-bottom: 1px solid ${gridOverrides?.cellBorderColor ?? token.colorBorderSecondary};
+    border-right: 1px solid ${gridOverrides?.cellBorderColor ?? token.colorBorderSecondary};
     padding: ${token.paddingXS}px ${token.paddingSM}px;
     color: ${token.colorText};
     overflow: hidden;
@@ -101,14 +102,14 @@ const useGridStyles = createStyles(({ token, css }) => ({
     cursor: pointer;
 
     &:hover {
-      outline: 2px solid ${token.colorPrimary};
+      outline: 2px solid ${gridOverrides?.editOutlineColor ?? token.colorPrimary};
       outline-offset: -2px;
     }
   `,
   editCell: css`
     padding: 0;
-    border-bottom: 1px solid ${token.colorBorderSecondary};
-    border-right: 1px solid ${token.colorBorderSecondary};
+    border-bottom: 1px solid ${gridOverrides?.cellBorderColor ?? token.colorBorderSecondary};
+    border-right: 1px solid ${gridOverrides?.cellBorderColor ?? token.colorBorderSecondary};
 
     &:last-child {
       border-right: none;
@@ -116,13 +117,13 @@ const useGridStyles = createStyles(({ token, css }) => ({
   `,
   frozenCell: css`
     background: ${token.colorBgContainer};
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+    box-shadow: ${gridOverrides?.frozenColumnShadow ?? '2px 0 4px rgba(0, 0, 0, 0.08)'};
   `,
   editInput: css`
     width: 100%;
     height: 100%;
     border: none;
-    outline: 2px solid ${token.colorPrimary};
+    outline: 2px solid ${gridOverrides?.editOutlineColor ?? token.colorPrimary};
     outline-offset: -2px;
     padding: ${token.paddingXS}px ${token.paddingSM}px;
     font-size: inherit;
@@ -132,7 +133,7 @@ const useGridStyles = createStyles(({ token, css }) => ({
     box-sizing: border-box;
 
     &:focus {
-      outline: 2px solid ${token.colorPrimary};
+      outline: 2px solid ${gridOverrides?.editOutlineColor ?? token.colorPrimary};
       outline-offset: -2px;
     }
   `,
@@ -142,7 +143,7 @@ const useGridStyles = createStyles(({ token, css }) => ({
     .ant-select-selector {
       border: none !important;
       box-shadow: none !important;
-      outline: 2px solid ${token.colorPrimary} !important;
+      outline: 2px solid ${gridOverrides?.editOutlineColor ?? token.colorPrimary} !important;
       outline-offset: -2px;
       padding: ${token.paddingXS}px ${token.paddingSM}px !important;
       font-size: inherit;
@@ -160,6 +161,44 @@ const useGridStyles = createStyles(({ token, css }) => ({
     .ant-select-item {
       font-size: ${token.fontSize}px;
       padding: ${token.paddingXS}px ${token.paddingSM}px;
+    }
+  `,
+  exportContainer: css`
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  `,
+  exportButtonWrapper: css`
+    position: absolute;
+    z-index: 4;
+  `,
+  exportButtonTopRight: css`
+    top: -${token.paddingSM + 18}px;
+    right: 0;
+  `,
+  exportButtonTopLeft: css`
+    top: -${token.paddingSM + 18}px;
+    left: 0;
+  `,
+  exportButtonBottomRight: css`
+    bottom: -${token.paddingSM + 18}px;
+    right: 0;
+  `,
+  exportButtonBottomLeft: css`
+    bottom: -${token.paddingSM + 18}px;
+    left: 0;
+  `,
+  exportButtonIcon: css`
+    font-size: 16px;
+    color: ${token.colorTextSecondary};
+    cursor: pointer;
+    padding: ${token.paddingXS}px;
+    border-radius: ${token.borderRadius}px;
+    transition: color 0.2s, background 0.2s;
+
+    &:hover {
+      color: ${token.colorPrimary};
+      background: ${token.colorFillTertiary};
     }
   `,
 }));

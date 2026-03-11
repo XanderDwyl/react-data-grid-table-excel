@@ -1,13 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import type { CSSProperties } from 'react';
+import { ConfigProvider } from 'antd';
 import type { DataGridProps, ColumnDef } from '../types';
 import { useSorting } from '../hooks/useSorting';
 import { useEditing } from '../hooks/useEditing';
+import { useGridTheme } from '../hooks/useGridTheme';
 import { sortRows } from '../utils/sorting';
 import useGridStyles from '../styles/useGridStyles';
 import HeaderCell from './HeaderCell';
 import DataCell from './DataCell';
 import EditableCell from './EditableCell';
+import ExportButton from './ExportButton';
+import ThemeFloatButton from './ThemeFloatButton';
+import ThemeDrawer from './ThemeDrawer';
 
 type AnyRecord = Record<string, unknown>;
 
@@ -46,11 +51,31 @@ function DataGrid<TRow extends object>({
   sort,
   onSortChange,
   showColumnLetters = false,
+  themeConfigurable = false,
+  theme,
+  onThemeChange,
+  showThemeButton = true,
+  themeButtonRender,
+  exportable = false,
+  exportFileName = 'export',
+  exportButtonPosition = 'top-right',
   onFreezeChange,
   className,
   style,
 }: DataGridProps<TRow>) {
-  const { styles, cx } = useGridStyles();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const toggleDrawer = useCallback(() => setDrawerOpen((v) => !v), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+
+  const {
+    currentTheme,
+    updateTheme,
+    setStatusColor,
+    removeStatusColor,
+    tokenOverrides,
+  } = useGridTheme({ theme, onThemeChange });
+
+  const { styles, cx } = useGridStyles(currentTheme.grid);
   const { currentSort, toggleSort } = useSorting({ sort, onSortChange });
   const { editingCell, startEditing, commitEdit, cancelEdit } = useEditing();
 
@@ -61,6 +86,13 @@ function DataGrid<TRow extends object>({
     if (!currentSort.columnKey || !currentSort.direction) return rows;
     return sortRows(rows, currentSort.columnKey, currentSort.direction);
   }, [rows, currentSort]);
+
+  const exportColumns = useMemo(() => {
+    if (!exportable) return columns;
+    const frozen = columns.filter((c) => c.frozen);
+    const unfrozen = columns.filter((c) => !c.frozen);
+    return [...frozen, ...unfrozen];
+  }, [columns, exportable]);
 
   function getStickyStyle(colKey: string): CSSProperties | undefined {
     if (!hasFrozen) return undefined;
@@ -84,7 +116,7 @@ function DataGrid<TRow extends object>({
     };
   }
 
-  return (
+  const tableContent = (
     <div className={cx(styles.gridWrapper, className)} style={style}>
       <table className={styles.table}>
         <thead>
@@ -113,6 +145,7 @@ function DataGrid<TRow extends object>({
                 onSort={toggleSort}
                 stickyStyle={getStickyHeaderStyle(col.key)}
                 onFreezeChange={onFreezeChange}
+                themeBg={col.frozen ? currentTheme.grid?.frozenHeaderBg : currentTheme.grid?.unfrozenHeaderBg}
               />
             ))}
           </tr>
@@ -150,7 +183,7 @@ function DataGrid<TRow extends object>({
                         autoCompleteOptions={col.autoCompleteOptions}
                         stickyStyle={getStickyStyle(col.key)}
                         frozen={col.frozen}
-                      />
+                              />
                     );
                   }
 
@@ -175,6 +208,43 @@ function DataGrid<TRow extends object>({
           })}
         </tbody>
       </table>
+    </div>
+  );
+
+  const table = tokenOverrides
+    ? <ConfigProvider theme={{ token: tokenOverrides }}>{tableContent}</ConfigProvider>
+    : tableContent;
+
+  const themeElements = themeConfigurable && (
+    <>
+      {showThemeButton && (
+        <ThemeFloatButton onClick={toggleDrawer} themeButtonRender={themeButtonRender} />
+      )}
+      <ThemeDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        currentTheme={currentTheme}
+        updateTheme={updateTheme}
+        setStatusColor={setStatusColor}
+        removeStatusColor={removeStatusColor}
+      />
+    </>
+  );
+
+  if (!exportable && !themeConfigurable) return table;
+
+  return (
+    <div className={styles.exportContainer}>
+      {exportable && (
+        <ExportButton
+          columns={exportColumns}
+          rows={sortedRows}
+          fileName={exportFileName}
+          position={exportButtonPosition}
+        />
+      )}
+      {themeElements}
+      {table}
     </div>
   );
 }

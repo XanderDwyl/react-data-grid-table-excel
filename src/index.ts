@@ -6,4 +6,5 @@ export type {
   SortState,
   SortDirection,
   CellAddress,
+  GridTheme,
 } from './types';
